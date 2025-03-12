@@ -1,0 +1,912 @@
+/* Import modern font */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+
+/* Basic reset and utility styles */
+body,
+html {
+  margin: 0;
+  padding: 0;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
+  transition: color 0.3s ease, background-color 0.3s ease;
+  height: 100%;
+  overflow-x: hidden; /* Prevent horizontal scrolling */
+  overflow-y: auto; /* Enable vertical scrolling */
+}
+
+body {
+  background-color: #f8f9fa; /* Light mode background */
+  color: #333; /* Light mode text color */
+}
+
+body.dark-mode {
+  background-color: #181822;
+  color: #e0e1e5;
+}
+
+/* Heading section within scrollable area */
+h3#heading {
+  font-size: 1.75rem;
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 80px;
+  width: calc(100% - 8ch); /* Reduced from 3ch to 8ch to avoid overlap */
+  margin: 0 auto;
+  padding: 0;
+  text-align: center;
+  background-color: transparent;
+  outline: none;
+  border: none;
+  z-index: 1;
+  color: inherit;
+  transition: all 0.2s ease;
+}
+/* Dark mode heading color */
+body.dark-mode #heading {
+  color: #e0e1e5; /* Adjust this to match your text color in dark mode */
+}
+
+/* Light mode heading color */
+body:not(.dark-mode) #heading {
+  color: #333; /* Adjust this to match your text color in light mode */
+}
+
+/* Placeholder styles */
+.placeholder {
+  color: #aaaeb8;
+}
+
+#heading:empty:before {
+  content: attr(placeholder);
+  color: #aaaeb8;
+}
+
+#heading:focus:empty:before {
+  content: "";
+}
+
+/* Textarea below heading */
+.textarea-fullscreen {
+  width: calc(100% - 6ch); /* Full width */
+  min-height: calc(
+    100vh - 80px
+  ); /* Adjust to fit the remaining page height after heading */
+  padding: 20px; /* Prevent text from touching the edges */
+  background: transparent;
+  color: inherit;
+  border: none;
+  outline: none;
+  resize: none; /* Disable resizing */
+  font-size: 16px;
+  line-height: 1.6;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
+  overflow-y: auto; /* Scroll content inside */
+  margin-top: 0; /* No extra margin */
+  transition: background-color 0.3s ease;
+  border-radius: 8px;
+  z-index: 10;
+  margin-bottom: 20px; /* Create more space between heading and textarea */
+  margin-left: 10px;
+}
+
+/* Add subtle background to textarea */
+body:not(.dark-mode) .textarea-fullscreen {
+  background-color: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+}
+
+body.dark-mode .textarea-fullscreen {
+  background-color: rgba(30, 30, 45, 0.7);
+  color: #e0e1e5;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Scroll behavior */
+html,
+body {
+  scroll-behavior: smooth;
+}
+
+/* Custom Scrollbar Styles */
+::-webkit-scrollbar {
+  width: 6px; /* Slimmer scrollbar width */
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(120, 120, 140, 0.4); /* Custom color */
+  border-radius: 10px; /* Rounded edges */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(120, 120, 140, 0.6); /* Darken on hover */
+}
+
+::-webkit-scrollbar-track {
+  background: transparent; /* Transparent track */
+}
+
+/* Position the toggle and ellipsis icons */
+.absolute {
+  position: fixed; /* Fix the toggle menu in place */
+  background-color: transparent;
+  border-radius: 8px;
+  padding: 8px;
+  z-index: 2;
+}
+
+.top-4 {
+  top: 0.5rem;
+}
+
+.right-4 {
+  right: 1rem;
+}
+
+.flex {
+  display: flex;
+  align-items: center;
+}
+
+.gap-4 {
+  gap: 1rem;
+}
+
+/* Enhanced settings toggle button */
+#settingsToggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: none;
+  padding: 10px; /* Increased from 8px */
+  margin: 4px; /* Added margin to increase hover area */
+  border-radius: 50%;
+  color: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 20;
+  position: relative;
+}
+#settingsToggle::before {
+  content: "";
+  position: absolute;
+  top: -12px;
+  left: -12px;
+  right: -12px;
+  bottom: -12px;
+  border-radius: 50%;
+  z-index: -1;
+}
+#settingsToggle:hover {
+  background-color: rgba(255, 255, 255, 0.3); /* Increase from 0.2 */
+  transform: translateY(-2px);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15); /* Add shadow effect */
+}
+#settingsToggle:active {
+  transform: translateY(0);
+}
+
+/* Improved settings menu */
+#settingsMenu {
+  display: none;
+  right: 0;
+  top: 3rem;
+  background-color: rgba(255, 255, 255, 0.92);
+  color: #333;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  padding: 12px 8px;
+  backdrop-filter: blur(10px);
+  z-index: 3;
+  min-width: 200px;
+  transform-origin: top right;
+  animation: slideIn 0.2s ease;
+  z-index: 30; /* Increase from current z-index: 3 */
+}
+
+body.dark-mode #settingsMenu {
+  background-color: rgba(40, 40, 60, 0.92);
+  color: #e0e1e5;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+#settingsMenu.active {
+  display: block;
+}
+
+#settingsMenu ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+#settingsMenu li {
+  margin: 2px 0;
+}
+
+#settingsMenu button {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  padding: 10px;
+  font-size: 14px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#settingsMenu button:hover {
+  background-color: rgba(100, 100, 120, 0.1);
+  transform: translateX(3px);
+}
+
+body.dark-mode #settingsMenu button:hover {
+  background-color: rgba(200, 200, 220, 0.1);
+}
+
+/* Placeholder styles */
+::placeholder {
+  color: #aaaeb8;
+  opacity: 1;
+}
+
+textarea::placeholder {
+  color: #aaaeb8;
+}
+
+.dark-mode ::placeholder {
+  color: rgba(224, 225, 229, 0.3);
+}
+
+/* Style adjustments for large cursor on heading hover */
+#heading:hover {
+  cursor: pointer;
+  color: rgba(100, 100, 120, 0.9); /* Slight color change on hover */
+}
+
+/* Larger cursor on heading click */
+#heading:active {
+  cursor: text;
+}
+
+/* Document manager styling */
+#documentManager {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+#documentList {
+  border: 1px solid rgba(200, 200, 200, 0.3);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+#documentList .font-medium {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 250px;
+}
+
+#documentList > div {
+  transition: background-color 0.2s ease;
+}
+
+#documentList > div:hover {
+  background-color: rgba(100, 100, 120, 0.05);
+}
+
+body.dark-mode #documentList > div:hover {
+  background-color: rgba(200, 200, 220, 0.05);
+}
+
+.dark-mode #documentManager .bg-white {
+  background-color: #232330;
+}
+
+/* Improved buttons */
+.bg-blue-500 {
+  background-color: #4f46e5 !important;
+  transition: all 0.3s ease !important;
+}
+
+.bg-blue-500:hover {
+  background-color: #4338ca !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2) !important;
+}
+
+#newDocBtn {
+  transition: all 0.2s ease;
+}
+
+#newDocBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Share button styling */
+.bg-indigo-500 {
+  background-color: #6366f1;
+  transition: all 0.3s ease;
+}
+
+.bg-indigo-500:hover {
+  background-color: #4f46e5;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+}
+
+/* Word counter and save indicator */
+#word-counter,
+#save-indicator {
+  background-color: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(8px);
+  padding: 6px 12px !important;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  font-weight: 500;
+}
+
+body.dark-mode #word-counter,
+body.dark-mode #save-indicator {
+  background-color: rgba(30, 30, 45, 0.7);
+}
+
+/* Notification styling */
+#notification {
+  background-color: #10b981;
+  color: white;
+  border-radius: 8px;
+  padding: 10px 16px;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+  animation: slideUp 0.3s ease;
+  z-index: 100;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Share box styling */
+#shareBox {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 12px;
+}
+
+#shareUrlInput {
+  border: 1px solid rgba(200, 200, 220, 0.3);
+  background-color: rgba(255, 255, 255, 0.9);
+  color: #333;
+  border-radius: 6px;
+}
+
+body.dark-mode #shareUrlInput {
+  background-color: rgba(30, 30, 45, 0.9);
+  color: #e0e1e5;
+}
+
+/* Footer styling */
+footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  padding: 8px 0;
+  background-color: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(5px);
+  z-index: 10;
+}
+
+body.dark-mode footer {
+  background-color: rgba(24, 24, 34, 0.6);
+}
+
+/* Delete and open document buttons */
+.open-doc,
+.delete-doc {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.open-doc:hover {
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+.delete-doc:hover {
+  background-color: rgba(239, 68, 68, 0.1);
+}
+
+/* Utility classes for Tailwind-like styling */
+.hidden {
+  display: none !important;
+}
+
+.opacity-0 {
+  opacity: 0 !important;
+}
+
+.opacity-100 {
+  opacity: 1 !important;
+}
+
+.transition-opacity {
+  transition: opacity 0.3s ease;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+  h3#heading {
+    font-size: 1.5rem;
+    height: 60px;
+  }
+
+  .textarea-fullscreen {
+    width: calc(100% - 2ch);
+    min-height: calc(100vh - 60px);
+    padding: 16px;
+  }
+
+  #word-counter,
+  #save-indicator {
+    font-size: 0.75rem;
+    padding: 4px 8px !important;
+  }
+
+  #settingsMenu {
+    width: calc(100% - 24px);
+    right: 12px;
+  }
+
+  footer {
+    padding-bottom: 16px;
+  }
+}
+
+/* Dark/Light mode transition effects */
+.transition-colors {
+  transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+/* Focus styles for better accessibility */
+button:focus,
+textarea:focus,
+#heading:focus {
+  outline: 2px solid rgba(99, 102, 241, 0.5);
+  outline-offset: 4px;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode button:focus,
+body.dark-mode textarea:focus,
+body.dark-mode #heading:focus {
+  outline-color: rgba(139, 92, 246, 0.5);
+  background-color: rgba(255, 255, 255, 0.8);
+}
+/* Enhance mobile responsiveness */
+@media (max-width: 768px) {
+  /* Existing mobile styles */
+
+  /* Improved touch targets */
+  #settingsToggle {
+    padding: 12px; /* Larger touch target */
+  }
+
+  /* Better positioned indicators */
+  #word-counter {
+    bottom: 40px; /* Prevent overlap with footer */
+  }
+
+  /* Document list on mobile */
+  #documentList .font-medium {
+    max-width: 180px;
+  }
+
+  /* Improved footer */
+  footer {
+    position: fixed;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+}
+/* Add for better visual feedback */
+.textarea-fullscreen:focus {
+  background-color: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+body.dark-mode .textarea-fullscreen:focus {
+  background-color: rgba(35, 35, 50, 0.85);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Improve heading interactions */
+#heading {
+  position: relative;
+}
+
+#heading:hover::after {
+  content: "✏️";
+  position: absolute;
+  right: -30px;
+  opacity: 0.5;
+  font-size: 0.8rem;
+}
+/* Adjust the settings container to be further right */
+.absolute.top-4.right-4 {
+  right: 1rem; /* Original value */
+}
+
+@media (min-width: 640px) {
+  .absolute.top-4.right-4 {
+    right: 2rem; /* Move further right on larger screens */
+  }
+}
+
+/* Add these styles for the new document toolbar */
+.document-toolbar {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(200, 200, 220, 0.3);
+  margin-bottom: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  z-index: 10;
+  transition: all 0.3s ease;
+}
+
+body.dark-mode .document-toolbar {
+  background-color: rgba(30, 30, 45, 0.8);
+  border-bottom: 1px solid rgba(60, 60, 80, 0.5);
+}
+
+.document-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.current-document-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: rgba(79, 70, 229, 0.1);
+  border-radius: 6px;
+  color: #4f46e5;
+}
+
+body.dark-mode .current-document-icon {
+  background: rgba(99, 102, 241, 0.2);
+  color: #818cf8;
+}
+
+.document-dropdown {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.03);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex: 1;
+  max-width: 300px;
+}
+
+.document-dropdown:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+body.dark-mode .document-dropdown {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+body.dark-mode .document-dropdown:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+#currentDocumentName {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
+}
+
+.dropdown-arrow {
+  opacity: 0.6;
+  transition: transform 0.2s ease;
+}
+
+.document-dropdown:hover .dropdown-arrow {
+  transform: translateY(2px);
+}
+
+.document-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.icon-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: transparent;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.icon-button:hover {
+  background: rgba(0, 0, 0, 0.05);
+  transform: translateY(-1px);
+}
+
+body.dark-mode .icon-button:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Document Grid Styling */
+.document-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 16px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 8px 0;
+}
+
+.document-card {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(200, 200, 220, 0.3);
+  transition: all 0.2s ease;
+  background-color: rgba(255, 255, 255, 0.5);
+  height: 180px;
+  display: flex;
+  flex-direction: column;
+}
+
+body.dark-mode .document-card {
+  background-color: rgba(40, 40, 60, 0.5);
+  border-color: rgba(60, 60, 80, 0.5);
+}
+
+.document-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: rgba(79, 70, 229, 0.3);
+}
+
+body.dark-mode .document-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border-color: rgba(99, 102, 241, 0.5);
+}
+
+.document-card.active {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.3);
+}
+
+body.dark-mode .document-card.active {
+  border-color: #818cf8;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.4);
+}
+
+.document-preview {
+  padding: 12px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #666;
+  overflow: hidden;
+  flex: 1;
+  position: relative;
+}
+
+body.dark-mode .document-preview {
+  color: #aaa;
+}
+
+.document-preview::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: linear-gradient(transparent, rgb(255 255 255 / 90%));
+  pointer-events: none;
+}
+
+body.dark-mode .document-preview::after {
+  background: linear-gradient(transparent, rgba(40, 40, 60, 0.9));
+}
+
+.document-info-bar {
+  border-top: 1px solid rgba(200, 200, 220, 0.3);
+  padding: 8px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  color: #888;
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+body.dark-mode .document-info-bar {
+  border-color: rgba(60, 60, 80, 0.5);
+  color: #777;
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.document-card-title {
+  font-weight: 600;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(200, 200, 220, 0.3);
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+body.dark-mode .document-card-title {
+  border-color: rgba(60, 60, 80, 0.5);
+}
+
+.document-card-actions {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.document-card:hover .document-card-actions {
+  opacity: 1;
+}
+
+.doc-card-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(200, 200, 220, 0.5);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+body.dark-mode .doc-card-btn {
+  background-color: rgba(40, 40, 60, 0.9);
+  border-color: rgba(60, 60, 80, 0.7);
+}
+
+.doc-card-btn:hover {
+  transform: translateY(-1px);
+}
+
+.doc-card-btn.delete:hover {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.doc-card-btn.favorite svg {
+  fill: none;
+  transition: fill 0.2s ease;
+}
+
+.doc-card-btn.favorite.active svg {
+  fill: #eab308;
+  color: #eab308;
+}
+
+/* Filter buttons styling */
+.doc-filter-btn {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 14px;
+  background-color: transparent;
+  border: 1px solid rgba(200, 200, 220, 0.5);
+  color: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.doc-filter-btn:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.doc-filter-btn.active {
+  background-color: rgba(79, 70, 229, 0.1);
+  border-color: #4f46e5;
+  color: #4f46e5;
+}
+
+body.dark-mode .doc-filter-btn {
+  border-color: rgba(60, 60, 80, 0.7);
+}
+
+body.dark-mode .doc-filter-btn:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+body.dark-mode .doc-filter-btn.active {
+  background-color: rgba(99, 102, 241, 0.2);
+  border-color: #818cf8;
+  color: #818cf8;
+}
+
+/* Adjust the settings container to be further right */
+.absolute.top-4.right-6 {
+  right: 2rem !important; /* Increased from 1.5rem (6) */
+}
+
+@media (min-width: 640px) {
+  .absolute.top-4.right-6 {
+    right: 3rem !important; /* Further right on larger screens */
+  }
+}
+
+@media (min-width: 1024px) {
+  .absolute.top-4.right-6 {
+    right: 4rem !important; /* Even further on very large screens */
+  }
+}

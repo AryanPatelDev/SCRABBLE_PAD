@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Redirecting...</title>
+    <script>
+      // Parse the URL path
+      const path = window.location.pathname;
+      const docId = path.substring(1); // Remove leading slash
+
+      // Redirect to index with the document ID
+      if (docId && docId !== "index.html") {
+        sessionStorage.setItem("redirectDocId", docId);
+        window.location.replace("/");
+      } else {
+        window.location.replace("/");
+      }
+    </script>
+  </head>
+  <body>
+    <p>Redirecting to document...</p>
+  </body>
+</html>
