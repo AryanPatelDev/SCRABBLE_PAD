@@ -47,7 +47,8 @@ h3#heading {
 }
 /* Dark mode heading color */
 body.dark-mode #heading {
-  color: #e0e1e5; /* Adjust this to match your text color in dark mode */
+  color: #e0e1e5;
+  background-color: transparent !important; /* Force transparent background */
 }
 
 /* Light mode heading color */
@@ -370,28 +371,110 @@ body.dark-mode #documentList > div:hover {
 /* Word counter and save indicator */
 #word-counter,
 #save-indicator {
-  background-color: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(8px);
   padding: 6px 12px !important;
   border-radius: 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   font-weight: 500;
+  position: fixed !important;
+  bottom: 16px !important;
+  z-index: 40 !important;
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  border-radius: 20px !important;
+  padding: 8px 12px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+#word-counter {
+  right: 16px !important;
+}
+
+#save-indicator {
+  left: 16px !important;
 }
 
 body.dark-mode #word-counter,
 body.dark-mode #save-indicator {
-  background-color: rgba(30, 30, 45, 0.7);
+  background-color: rgba(40, 40, 60, 0.9) !important;
 }
 
 /* Notification styling */
 #notification {
-  background-color: #10b981;
-  color: white;
-  border-radius: 8px;
-  padding: 10px 16px;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
-  animation: slideUp 0.3s ease;
-  z-index: 100;
+  position: fixed !important;
+  bottom: 24px !important;
+  left: 50% !important;
+  transform: translate(-50%, 100px) !important;
+  border-radius: 8px !important;
+  padding: 10px 16px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  color: white !important;
+  background-color: rgba(14, 165, 233, 0.95) !important;
+  backdrop-filter: blur(8px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  z-index: 3000 !important;
+  max-width: 300px !important;
+  text-align: center !important;
+  opacity: 0 !important;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 0.3s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  pointer-events: none !important;
+}
+
+#notification.active {
+  opacity: 1 !important;
+  transform: translate(-50%, 0) !important;
+}
+
+#notification.error {
+  background-color: rgba(239, 68, 68, 0.95) !important;
+}
+
+#notification.success::before {
+  content: "✓" !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 18px !important;
+  height: 18px !important;
+  background-color: rgba(255, 255, 255, 0.25) !important;
+  border-radius: 50% !important;
+  margin-right: 4px !important;
+  font-size: 12px !important;
+}
+
+#notification.error::before {
+  content: "!" !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 18px !important;
+  height: 18px !important;
+  background-color: rgba(255, 255, 255, 0.25) !important;
+  border-radius: 50% !important;
+  margin-right: 4px !important;
+  font-size: 12px !important;
+}
+@media (max-width: 768px) {
+  #notification {
+    bottom: 16px !important; /* Changed from 80px (which was keeping it above the mobile app bar) */
+    padding: 8px 14px !important;
+    font-size: 12px !important;
+    max-width: 80% !important;
+  }
+}
+}
+@keyframes slideUpNotification {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
 }
 
 @keyframes slideUp {
@@ -513,7 +596,7 @@ body.dark-mode footer {
 button:focus,
 textarea:focus,
 #heading:focus {
-  outline: 2px solid rgba(99, 102, 241, 0.5);
+  /* outline: 0.5px solid rgba(99, 102, 241, 0.5); */
   outline-offset: 4px;
   background-color: rgba(255, 255, 255, 0.1);
 }
@@ -569,12 +652,8 @@ body.dark-mode .textarea-fullscreen:focus {
 }
 
 #heading:hover::after {
-  content: "✏️";
-  position: absolute;
-  right: -30px;
-  opacity: 0.5;
-  font-size: 0.8rem;
-}
+  content: none;
+ }
 /* Adjust the settings container to be further right */
 .absolute.top-4.right-4 {
   right: 1rem; /* Original value */
@@ -909,4 +988,519 @@ body.dark-mode .doc-filter-btn.active {
   .absolute.top-4.right-6 {
     right: 4rem !important; /* Even further on very large screens */
   }
+}
+/* Modal styling */
+
+#welcomeModal {
+  z-index: 2000 !important; /* Higher than everything else */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+}
+
+#welcomeModal.hidden {
+  display: none !important;
+}
+
+#welcomeModal > div {
+  margin: auto !important;
+  max-height: 90vh !important;
+  overflow-y: auto !important;
+}
+
+/* Modern, Minimalist Modal Styling */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+}
+
+/* Base modal container */
+.app-modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 16px;
+}
+
+.app-modal.hidden {
+  display: none;
+}
+
+/* Modal content container */
+.modal-content {
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  max-width: 500px;
+  max-height: 85vh;
+  overflow-y: auto;
+  position: relative;
+  animation: modal-appear 0.3s cubic-bezier(0.21, 1.02, 0.73, 1) forwards;
+}
+
+@keyframes modal-appear {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Dark mode styling */
+body.dark-mode .modal-content {
+  background-color: #1e293b;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+}
+
+/* Modal header */
+.modal-header {
+  padding: 24px 24px 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+body.dark-mode .modal-header {
+  border-bottom: 1px solid #334155;
+}
+
+.modal-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+body.dark-mode .modal-title {
+  color: #f8fafc;
+}
+
+/* Close button */
+.modal-close {
+  background: none;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.modal-close:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+body.dark-mode .modal-close:hover {
+  background-color: #334155;
+  color: #f8fafc;
+}
+
+/* Modal body */
+.modal-body {
+  padding: 16px 24px 24px 24px;
+}
+
+/* Modal actions */
+.modal-actions {
+  padding-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* Modern, subtle text input */
+.input-container {
+  display: flex;
+  margin-bottom: 16px;
+}
+
+.text-input {
+  flex: 1;
+  border: 1px solid #e2e8f0;
+  border-right: none;
+  border-radius: 8px 0 0 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #0f172a;
+  transition: all 0.2s ease;
+}
+
+.text-input:focus {
+  outline: none;
+  border-color: #0ea5e9;
+  box-shadow: 0 0 0 1px rgba(14, 165, 233, 0.1);
+}
+
+body.dark-mode .text-input {
+  background-color: #1e293b;
+  border-color: #334155;
+  color: #f8fafc;
+}
+
+body.dark-mode .text-input:focus {
+  border-color: #0ea5e9;
+}
+
+/* Button styling */
+.button {
+  background-color: #0ea5e9;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.button:hover {
+  background-color: #0284c7;
+  transform: translateY(-1px);
+}
+
+.button:active {
+  transform: translateY(0);
+}
+
+.button-copy {
+  border-radius: 0 8px 8px 0;
+  padding: 0 16px;
+}
+
+/* Welcome guide styling */
+.welcome-list {
+  margin: 20px 0 !important;
+  padding-left: 0 !important;
+  list-style: none !important;
+}
+
+.welcome-list li {
+  position: relative !important;
+  padding-left: 28px !important;
+  margin-bottom: 12px !important;
+  line-height: 1.5 !important;
+}
+
+.welcome-list li::before {
+  content: "" !important;
+  position: absolute !important;
+  left: 0 !important;
+  top: 0.25em !important;
+  width: 18px !important;
+  height: 18px !important;
+  background-color: rgba(14, 165, 233, 0.1) !important;
+  border-radius: 50% !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='16' height='16' stroke='%230ea5e9' stroke-width='2' fill='none'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E") !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  background-size: 12px !important;
+}
+
+body.dark-mode .welcome-list li::before {
+  background-color: rgba(56, 189, 248, 0.2) !important;
+}
+.shortcuts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 16px 0;
+  font-size: 14px;
+}
+
+.shortcuts-grid div:nth-child(odd) {
+  font-weight: 500;
+}
+
+.shortcuts-grid div:nth-child(even) {
+  color: #64748b;
+}
+
+body.dark-mode .shortcuts-grid div:nth-child(even) {
+  color: #94a3b8;
+}
+
+/* Share QR section */
+.share-section {
+  margin-top: 16px;
+}
+
+.share-section-title {
+  font-weight: 500;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.qr-caption {
+  margin-top: 12px;
+  font-size: 13px;
+  color: #64748b;
+  text-align: center;
+}
+
+body.dark-mode .qr-caption {
+  color: #94a3b8;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .modal-content {
+    max-width: 100%;
+  }
+
+  .modal-header,
+  .modal-body {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
+#shareLinkDialog {
+  z-index: 1000 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+}
+
+#shareLinkDialog.hidden {
+  display: none !important;
+}
+
+#shareLinkDialog > div {
+  position: relative !important;
+  max-height: 90vh !important;
+  overflow-y: auto !important;
+  margin: auto !important;
+}
+
+#closeShareDialog,
+#closeWelcome {
+  background-color: rgba(0, 0, 0, 0.1) !important;
+  border-radius: 50% !important;
+  width: 32px !important;
+  height: 32px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 18px !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+#closeShareDialog:hover,
+#closeWelcome:hover {
+  background-color: rgba(0, 0, 0, 0.2) !important;
+  transform: scale(1.1) !important;
+}
+
+body.dark-mode #closeShareDialog,
+body.dark-mode #closeWelcome {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+body.dark-mode #closeShareDialog:hover,
+body.dark-mode #closeWelcome:hover {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* QR Code Styling Improvements */
+#qrcode {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+  border-radius: 12px !important;
+  padding: 16px !important;
+  background-color: white !important;
+  display: inline-block !important;
+  margin: 0 auto !important;
+  min-height: 200px !important;
+  min-width: 200px !important;
+  transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+  border: 1px solid rgba(0, 0, 0, 0.04) !important;
+}
+
+#qrcode:hover {
+  transform: scale(1.02) !important;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12) !important;
+}
+
+body.dark-mode #qrcode {
+  background-color: white !important; /* Always keep white background for QR */
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* QR Container and animations */
+.qr-container {
+  margin: 8px auto 16px !important;
+  text-align: center !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  animation: fadeSlideUp 0.4s ease !important;
+}
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Improved QR caption */
+.qr-caption {
+  margin-top: 12px !important;
+  font-size: 13px !important;
+  color: #64748b !important;
+  opacity: 0.8 !important;
+  text-align: center !important;
+  font-style: italic !important;
+}
+
+body.dark-mode .qr-caption {
+  color: #94a3b8 !important;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  #notification {
+    bottom: 16px !important; /* Keep above mobile app bar */
+    padding: 10px 16px !important;
+    font-size: 13px !important;
+  }
+
+  .qr-container {
+    margin: 4px auto 12px !important;
+  }
+
+  #qrcode {
+    min-height: 180px !important;
+    min-width: 180px !important;
+    padding: 12px !important;
+  }
+}
+/* Additional improvements for the share input */
+.input-container {
+  position: relative !important;
+  margin-top: 16px !important;
+  animation: fadeIn 0.3s ease !important;
+}
+
+.text-input {
+  width: 100% !important;
+  padding: 12px 16px !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  background-color: #f8fafc !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02) !important;
+  transition: all 0.2s ease !important;
+  padding-right: 48px !important; /* Make room for copy button */
+}
+
+.text-input:focus {
+  outline: none !important;
+  border-color: #0ea5e9 !important;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1) !important;
+}
+
+body.dark-mode .text-input {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+/* Copy button enhancements */
+#copyLink {
+  position: absolute !important;
+  right: 4px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  background-color: transparent !important;
+  color: #64748b !important;
+  padding: 8px !important;
+  border-radius: 6px !important;
+  transition: all 0.2s ease !important;
+}
+
+#copyLink:hover {
+  background-color: rgba(14, 165, 233, 0.1) !important;
+  color: #0ea5e9 !important;
+}
+
+body.dark-mode #copyLink {
+  color: #94a3b8 !important;
+}
+
+body.dark-mode #copyLink:hover {
+  background-color: rgba(14, 165, 233, 0.2) !important;
+  color: #38bdf8 !important;
+}
+
+/* Modal header gradient enhancement */
+.modal-header {
+  background: linear-gradient(135deg, #0ea5e9, #38bdf8) !important;
+  padding: 20px 24px !important;
+  border-radius: 12px 12px 0 0 !important;
+  border-bottom: none !important;
+}
+
+.modal-title {
+  color: white !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em !important;
+}
+/* Close button contrast fix */
+.modal-close {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+}
+
+.modal-close:hover {
+  background-color: rgba(255, 255, 255, 0.3) !important;
+  transform: rotate(90deg) !important;
+  transition: all 0.3s ease !important;
+}
+
+/* PRETIFY*/
+/* Add to style.css */
+.textarea-fullscreen {
+  font-feature-settings: "liga" 1, "calt" 1; /* Enable ligatures for symbols */
+}
+
+/* Styling for the arrows and symbols to make them stand out a bit */
+.arrow-symbol {
+  color: #0ea5e9; /* Use your primary blue color */
+  font-weight: 500;
 }

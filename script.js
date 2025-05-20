@@ -308,20 +308,29 @@ function showNotification(message, type = "success", duration = 3000) {
 
   notification.textContent = message;
 
-  // Set color based on type
-  if (type === "error") {
-    notification.classList.remove("bg-green-500");
-    notification.classList.add("bg-red-500");
-  } else {
-    notification.classList.remove("bg-red-500");
-    notification.classList.add("bg-green-500");
+  // Set type
+  notification.classList.remove("success", "error");
+  notification.classList.add(type);
+
+  // Reset any current animations
+  notification.classList.remove("hidden", "opacity-0", "opacity-100", "active");
+
+  // Force a reflow before adding the active class (this makes the animation work properly)
+  void notification.offsetWidth;
+
+  // Show the notification with animation
+  notification.classList.add("active");
+
+  // Clear any existing timeout
+  if (window.notificationTimeout) {
+    clearTimeout(window.notificationTimeout);
   }
 
-  notification.classList.remove("hidden");
-  notification.classList.add("opacity-100");
+  // Set new timeout to hide the notification
+  window.notificationTimeout = setTimeout(() => {
+    notification.classList.remove("active");
 
-  setTimeout(() => {
-    notification.classList.add("opacity-0");
+    // Add hidden class after animation completes
     setTimeout(() => {
       notification.classList.add("hidden");
     }, 300);
@@ -433,13 +442,6 @@ function createNewDocument() {
   });
   saveDocumentsList(docs);
 
-  // Add to the createNewDocument function
-  const originalCreateNewDocument = createNewDocument;
-  createNewDocument = function () {
-    originalCreateNewDocument();
-    updateDocumentHeader();
-  };
-
   // Set as current document
   currentDocId = newId;
 
@@ -491,12 +493,6 @@ const debouncedSaveContent = debounce(function () {
 // Regular save function that calls the debounced version
 function saveDocumentContent() {
   debouncedSaveContent();
-  // Add to saveDocumentContent to update header when title changes
-  const originalSaveDocumentContent = saveDocumentContent;
-  saveDocumentContent = function () {
-    originalSaveDocumentContent();
-    updateDocumentHeader();
-  };
 }
 
 // Load document content
@@ -567,72 +563,6 @@ function deleteDocument(docId) {
     console.error("Error deleting document:", err);
     showNotification("Error deleting document", "error");
   }
-}
-
-// Populate document manager
-function showDocumentManager() {
-  console.log("Showing document manager");
-  const docs = getDocumentsList();
-  console.log("Documents:", docs);
-  const listEl = document.getElementById("documentList");
-  if (!listEl) {
-    console.error("Document list element not found");
-    return;
-  }
-
-  listEl.innerHTML = "";
-
-  if (docs.length === 0) {
-    listEl.innerHTML =
-      '<div class="text-gray-500 p-4 text-center">No documents found</div>';
-    return;
-  }
-
-  docs.forEach((doc) => {
-    const lastUpdated = new Date(doc.updated).toLocaleString();
-    const docEl = document.createElement("div");
-    docEl.className =
-      "border-b border-gray-200 dark:border-gray-700 p-3 flex justify-between items-center";
-    docEl.innerHTML = `
-          <div>
-            <div class="font-medium ${
-              doc.id === currentDocId ? "text-blue-500" : ""
-            }">${doc.title}</div>
-            <div class="text-xs text-gray-500">Last updated: ${lastUpdated}</div>
-          </div>
-          <div class="flex gap-2">
-            <button class="open-doc text-blue-500 hover:text-blue-700" data-id="${
-              doc.id
-            }">Open</button>
-            <button class="delete-doc text-red-500 hover:text-red-700" data-id="${
-              doc.id
-            }">Delete</button>
-          </div>
-        `;
-    listEl.appendChild(docEl);
-  });
-
-  // Add event listeners to buttons
-  document.querySelectorAll(".open-doc").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const docId = btn.getAttribute("data-id");
-      loadDocument(docId);
-      document.getElementById("documentManager").classList.add("hidden");
-    });
-  });
-
-  document.querySelectorAll(".delete-doc").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const docId = btn.getAttribute("data-id");
-      deleteDocument(docId);
-    });
-  });
-
-  // Show the manager
-  document.getElementById("documentManager").classList.remove("hidden");
-
-  // Initialize search functionality
-  setupDocumentSearch();
 }
 
 // Setup share functionality
@@ -732,18 +662,15 @@ document.addEventListener("keydown", function (e) {
     toggleDarkMode();
   }
 
-  // Ctrl/Cmd + , to open documents manager
-  if ((e.ctrlKey || e.metaKey) && e.key === ",") {
-    e.preventDefault();
-    const documentsBtn = document.getElementById("documentsBtn");
-    if (documentsBtn) documentsBtn.click();
-  }
-
   // Esc to close any open modals or menus
   if (e.key === "Escape") {
     const documentManager = document.getElementById("documentManager");
     const settingsMenu = document.getElementById("settingsMenu");
     const welcomeModal = document.getElementById("welcomeModal");
+    const shareLinkDialog = document.getElementById("shareLinkDialog");
+    if (shareLinkDialog && !shareLinkDialog.classList.contains("hidden")) {
+      shareLinkDialog.classList.add("hidden");
+    }
 
     if (documentManager && !documentManager.classList.contains("hidden")) {
       documentManager.classList.add("hidden");
@@ -769,29 +696,212 @@ window.addEventListener("popstate", function (event) {
   }
 });
 
-// Replace existing DOM content loaded handler with this simplified version
 document.addEventListener("DOMContentLoaded", () => {
-  // Check if first visit
+  // Define welcomeModal at the beginning so it's available throughout the function
   const welcomeModal = document.getElementById("welcomeModal");
-  if (welcomeModal && !localStorage.getItem("hasVisited")) {
-    welcomeModal.classList.remove("hidden");
-    localStorage.setItem("hasVisited", "true");
 
-    const closeWelcome = document.getElementById("closeWelcome");
-    const startWriting = document.getElementById("startWriting");
+  // Add these lines from the second event handler
+  const shareBtn = document.getElementById("share-btn");
+  const shareLinkDialog = document.getElementById("shareLinkDialog");
+  const closeShareDialog = document.getElementById("closeShareDialog");
+  const shareLinkInput = document.getElementById("shareLink");
+  const copyLinkBtn = document.getElementById("copyLink");
+  const sharedNoteView = document.getElementById("sharedNoteView");
+  const sharedNoteContent = document.getElementById("sharedNoteContent");
+  const editSharedNoteBtn = document.getElementById("editSharedNote");
+  const mainContent = document.querySelector(
+    ".h-screen.relative.max-w-screen-lg.mx-auto"
+  );
 
-    if (closeWelcome) {
-      closeWelcome.addEventListener("click", () => {
-        welcomeModal.classList.add("hidden");
-      });
-    }
-
-    if (startWriting) {
-      startWriting.addEventListener("click", () => {
-        welcomeModal.classList.add("hidden");
-      });
+  // Check if this is the first visit
+  if (!localStorage.getItem("hasVisited")) {
+    // Show welcome modal on first visit
+    if (welcomeModal) {
+      welcomeModal.classList.remove("hidden");
+      // Set the flag to prevent showing on subsequent visits
+      localStorage.setItem("hasVisited", "true");
     }
   }
+
+  // Set up welcome modal close buttons
+  const closeWelcome = document.getElementById("closeWelcome");
+  const startWriting = document.getElementById("startWriting");
+
+  if (closeWelcome) {
+    closeWelcome.addEventListener("click", function () {
+      welcomeModal.classList.add("hidden");
+      document.body.style.overflow = "auto";
+    });
+  }
+
+  if (startWriting) {
+    startWriting.addEventListener("click", function () {
+      welcomeModal.classList.add("hidden");
+      document.body.style.overflow = "auto";
+    });
+  }
+
+  const showWelcomeBtn = document.getElementById("showWelcomeBtn");
+  if (showWelcomeBtn) {
+    showWelcomeBtn.addEventListener("click", function () {
+      // Hide any other open dialogs
+      const shareLinkDialog = document.getElementById("shareLinkDialog");
+      if (shareLinkDialog) {
+        shareLinkDialog.classList.add("hidden");
+      }
+
+      // Show welcome modal (using the already defined welcomeModal)
+      if (welcomeModal) {
+        welcomeModal.classList.remove("hidden");
+        document.body.style.overflow = "hidden";
+      }
+
+      // Close settings menu
+      document.getElementById("settingsMenu").classList.add("hidden");
+    });
+  }
+
+  // Generate share link functionality
+  if (shareBtn) {
+    shareBtn.addEventListener("click", function () {
+      // Ensure welcome modal is hidden when share dialog is shown
+      if (welcomeModal) {
+        welcomeModal.classList.add("hidden");
+      }
+
+      const textContent = document.getElementById("scrabble-pad").value;
+      const headingContent = document
+        .getElementById("heading")
+        .textContent.trim();
+
+      if (!textContent.trim()) {
+        showNotification("Nothing to share. Write something first!", "error");
+        return;
+      }
+
+      // Compress the text content
+      const compressedContent =
+        LZString.compressToEncodedURIComponent(textContent);
+
+      // Generate the full URL
+      const shareURL = `${window.location.origin}${window.location.pathname}#note=${compressedContent}`;
+
+      // Show the share dialog
+      shareLinkInput.value = shareURL;
+      shareLinkDialog.classList.remove("hidden");
+      shareLinkInput.select();
+
+      // Generate QR code
+      try {
+        const qrcodeContainer = document.getElementById("qrcode");
+        qrcodeContainer.innerHTML = ""; // Clear previous QR code
+
+        QRCode.toCanvas(
+          qrcodeContainer,
+          shareURL,
+          {
+            width: 200,
+            margin: 1,
+            color: {
+              dark: document.body.classList.contains("dark-mode")
+                ? "#000000"
+                : "#000000",
+              light: "#ffffff",
+            },
+          },
+          function (error) {
+            if (error) {
+              console.error("Error generating QR code:", error);
+              showNotification("Error generating QR code", "error");
+            }
+          }
+        );
+
+        console.log("QR code generated successfully");
+      } catch (error) {
+        console.error("Failed to generate QR code:", error);
+        showNotification("Failed to generate QR code", "error");
+      }
+
+      // Close the settings menu
+      document.getElementById("settingsMenu").classList.add("hidden");
+    });
+  }
+
+  // Close share dialog
+  if (closeShareDialog) {
+    closeShareDialog.addEventListener("click", function () {
+      shareLinkDialog.classList.add("hidden");
+    });
+  }
+
+  // Copy link button
+  if (copyLinkBtn) {
+    copyLinkBtn.addEventListener("click", function () {
+      try {
+        navigator.clipboard
+          .writeText(shareLinkInput.value)
+          .then(() => {
+            showNotification("Link copied to clipboard!");
+          })
+          .catch((err) => {
+            // Fallback to the older method if the Clipboard API fails
+            shareLinkInput.select();
+            document.execCommand("copy");
+            showNotification("Link copied to clipboard!");
+          });
+      } catch (err) {
+        // Final fallback
+        shareLinkInput.select();
+        document.execCommand("copy");
+        showNotification("Link copied to clipboard!");
+      }
+    });
+  }
+
+  // Edit shared note
+  if (editSharedNoteBtn) {
+    editSharedNoteBtn.addEventListener("click", function () {
+      const noteContent = sharedNoteContent.textContent;
+      const textArea = document.getElementById("scrabble-pad");
+
+      // Put the shared note content into the editor
+      textArea.value = noteContent;
+
+      // Hide the shared note view, show the editor
+      sharedNoteView.classList.add("hidden");
+      mainContent.classList.remove("hidden");
+
+      // Remove the hash from the URL
+      history.pushState("", document.title, window.location.pathname);
+
+      // Save the content locally
+      saveDocumentContent();
+      showNotification("Note loaded to editor");
+    });
+  }
+
+  // Check for shared note in URL on page load
+  function checkForSharedNote() {
+    const hash = window.location.hash;
+    if (hash.startsWith("#note=")) {
+      try {
+        const compressedNote = hash.substring(6); // Remove the '#note=' part
+        const decompressedNote =
+          LZString.decompressFromEncodedURIComponent(compressedNote);
+
+        // Display the shared note
+        sharedNoteContent.textContent = decompressedNote;
+        mainContent.classList.add("hidden");
+        sharedNoteView.classList.remove("hidden");
+      } catch (e) {
+        showNotification("Error loading shared note", "error");
+      }
+    }
+  }
+
+  // Check for shared note when the page loads
+  checkForSharedNote();
 
   // Initialize simple document
   initDocument();
@@ -826,6 +936,55 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
+  // Modal handling
+  function setupModals() {
+    // Close modal when clicking outside content area
+    document.querySelectorAll(".app-modal").forEach((modal) => {
+      modal.addEventListener("click", (e) => {
+        if (e.target === modal) {
+          modal.classList.add("hidden");
+          document.body.style.overflow = "auto";
+        }
+      });
+    });
+
+    // Prevent propagation from modal content
+    document.querySelectorAll(".modal-content").forEach((content) => {
+      content.addEventListener("click", (e) => {
+        e.stopPropagation();
+      });
+    });
+
+    // Close modals with Escape key
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        document.querySelectorAll(".app-modal").forEach((modal) => {
+          if (!modal.classList.contains("hidden")) {
+            modal.classList.add("hidden");
+            document.body.style.overflow = "auto";
+          }
+        });
+      }
+    });
+  }
+
+  setupModals();
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+  // Setup the symbol formatting
+  const textarea = document.getElementById("scrabble-pad");
+  if (textarea) {
+    // Create a debounced version of formatTextAreaDisplay
+    const debouncedFormatText = debounce(formatTextAreaDisplay, 300);
+
+    textarea.addEventListener("input", function (e) {
+      // Only format if arrow characters are detected (removed horizontal rule detection)
+      if (/--|<=|=>|<-|->/.test(e.target.value)) {
+        debouncedFormatText();
+      }
+    });
+  }
 });
 
 // Add enhanced document management functions
@@ -847,266 +1006,50 @@ function updateDocumentHeader() {
     docName.textContent = "Untitled Document";
   }
 }
+// Pretty formatting for arrows, logical symbols, and horizontal rules
+function prettifySymbols(text) {
+  // Process only inline symbols
+  const replacements = [
+    { pattern: /-->/g, replacement: "→" },
+    { pattern: /<--/g, replacement: "←" },
+    { pattern: /<->/g, replacement: "↔" },
+    { pattern: /<=>/g, replacement: "⟺" },
+    { pattern: /=>/g, replacement: "⇒" },
+    { pattern: /<=/g, replacement: "⇐" },
+    { pattern: /->/g, replacement: "→" },
+    { pattern: /<-/g, replacement: "←" },
+  ];
 
-// Enhanced document population function
-function showDocumentManager() {
-  console.log("Showing document manager");
-  const docs = getDocumentsList();
-  console.log("Documents:", docs);
-  const listEl = document.getElementById("documentList");
-
-  if (!listEl) {
-    console.error("Document list element not found");
-    return;
+  // Apply all replacements
+  for (const { pattern, replacement } of replacements) {
+    text = text.replace(pattern, replacement);
   }
 
-  // Clear the list
-  listEl.innerHTML = "";
+  return text;
+}
+// Update the formatTextAreaDisplay function
+function formatTextAreaDisplay() {
+  const textarea = document.getElementById("scrabble-pad");
+  if (!textarea) return;
 
-  // Update document stats
-  const statsEl = document.getElementById("documentStats");
-  if (statsEl) {
-    let lastEditDate = "Never";
-    if (docs.length > 0) {
-      // Find the most recently updated document
-      const mostRecent = [...docs].sort(
-        (a, b) => new Date(b.updated) - new Date(a.updated)
-      )[0];
-      lastEditDate = new Date(mostRecent.updated).toLocaleDateString();
+  // Store cursor position
+  const selectionStart = textarea.selectionStart;
+  const selectionEnd = textarea.selectionEnd;
+
+  // Get raw content
+  const rawContent = textarea.value;
+
+  // Check if we need to perform replacements (optimization)
+  if (/--|<=|=>|<-|->/.test(rawContent)) {
+    // Create formatted text
+    const formattedContent = prettifySymbols(rawContent);
+
+    // Apply only if changed to avoid cursor jumping
+    if (formattedContent !== rawContent) {
+      textarea.value = formattedContent;
+
+      // Restore cursor position
+      textarea.setSelectionRange(selectionStart, selectionEnd);
     }
-    statsEl.textContent = `${docs.length} document${
-      docs.length !== 1 ? "s" : ""
-    } • Last edit: ${lastEditDate}`;
-  }
-
-  if (docs.length === 0) {
-    listEl.innerHTML = `
-        <div class="col-span-full text-center py-12">
-          <div class="text-gray-400 mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" class="mx-auto">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-              <polyline points="14 2 14 8 20 8"></polyline>
-              <line x1="16" y1="13" x2="8" y2="13"></line>
-              <line x1="16" y1="17" x2="8" y2="17"></line>
-              <polyline points="10 9 9 9 8 9"></polyline>
-            </svg>
-          </div>
-          <h4 class="text-lg font-medium text-gray-500">No documents yet</h4>
-          <p class="text-gray-400 mb-4">Create a new document to get started</p>
-          <button id="emptyStateNewDoc" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
-            + New Document
-          </button>
-        </div>
-      `;
-
-    // Add event listener for the empty state button
-    document
-      .getElementById("emptyStateNewDoc")
-      .addEventListener("click", () => {
-        createNewDocument();
-      });
-
-    return;
-  }
-
-  // Sort documents based on selected sort order
-  const sortSelect = document.getElementById("docSortOrder");
-  const sortBy = sortSelect ? sortSelect.value : "updated";
-
-  let sortedDocs = [...docs];
-  switch (sortBy) {
-    case "updated":
-      sortedDocs.sort((a, b) => new Date(b.updated) - new Date(a.updated));
-      break;
-    case "created":
-      sortedDocs.sort((a, b) => new Date(b.created) - new Date(a.created));
-      break;
-    case "name":
-      sortedDocs.sort((a, b) => a.title.localeCompare(b.title));
-      break;
-    // Implement other sort methods as needed
-  }
-
-  // Get current filter
-  const activeFilter = document.querySelector(".doc-filter-btn.active");
-  const filterType = activeFilter ? activeFilter.dataset.filter : "all";
-
-  // Filter docs if needed
-  if (filterType === "recent") {
-    // Show only docs from the last 7 days
-    const oneWeekAgo = new Date();
-    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-    sortedDocs = sortedDocs.filter((doc) => new Date(doc.updated) > oneWeekAgo);
-  } else if (filterType === "favorite") {
-    // Show only favorited docs (if you implement this feature)
-    sortedDocs = sortedDocs.filter((doc) => doc.favorite);
-  }
-
-  // Create document cards
-  sortedDocs.forEach((doc) => {
-    const lastUpdated = new Date(doc.updated).toLocaleDateString();
-    const isActive = doc.id === currentDocId;
-    const docContent = localStorage.getItem(`doc_${doc.id}_content`) || "";
-    const wordCount =
-      docContent.trim() === "" ? 0 : docContent.trim().split(/\s+/).length;
-
-    // We'll truncate the content for the preview
-    const previewContent =
-      docContent.length > 150
-        ? docContent.substring(0, 150) + "..."
-        : docContent;
-
-    const docEl = document.createElement("div");
-    docEl.className = `document-card ${isActive ? "active" : ""}`;
-    docEl.dataset.id = doc.id;
-
-    docEl.innerHTML = `
-        <div class="document-card-title">${
-          doc.title === "HEADING HERE..." ? "Untitled Document" : doc.title
-        }</div>
-        <div class="document-preview">${
-          previewContent || "Empty document"
-        }</div>
-        <div class="document-card-actions">
-          <button class="doc-card-btn favorite ${
-            doc.favorite ? "active" : ""
-          }" data-id="${doc.id}" title="Favorite">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="${
-              doc.favorite ? "currentColor" : "none"
-            }" stroke="currentColor" stroke-width="2">
-              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-            </svg>
-          </button>
-          <button class="doc-card-btn delete" data-id="${
-            doc.id
-          }" title="Delete">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="3 6 5 6 21 6"></polyline>
-              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-            </svg>
-          </button>
-        </div>
-        <div class="document-info-bar">
-          <span>${lastUpdated}</span>
-          <span>${wordCount} words</span>
-        </div>
-      `;
-
-    // Make the whole card clickable
-    docEl.addEventListener("click", (e) => {
-      // Don't open if clicking on an action button
-      if (e.target.closest(".doc-card-btn")) return;
-
-      loadDocument(doc.id);
-      document.getElementById("documentManager").classList.add("hidden");
-    });
-
-    listEl.appendChild(docEl);
-  });
-
-  // Add event listeners for action buttons
-  document.querySelectorAll(".doc-card-btn.delete").forEach((btn) => {
-    btn.addEventListener("click", (e) => {
-      e.stopPropagation(); // Prevent card click
-      const docId = btn.getAttribute("data-id");
-      deleteDocument(docId);
-    });
-  });
-
-  document.querySelectorAll(".doc-card-btn.favorite").forEach((btn) => {
-    btn.addEventListener("click", (e) => {
-      e.stopPropagation(); // Prevent card click
-      const docId = btn.getAttribute("data-id");
-      toggleFavorite(docId);
-      btn.classList.toggle("active");
-
-      // Update the star icon
-      const starIcon = btn.querySelector("svg");
-      if (btn.classList.contains("active")) {
-        starIcon.setAttribute("fill", "currentColor");
-      } else {
-        starIcon.setAttribute("fill", "none");
-      }
-    });
-  });
-
-  // Show the manager
-  document.getElementById("documentManager").classList.remove("hidden");
-
-  // Set up event listeners for filters and sorting
-  setupDocumentFiltersAndSorting();
-}
-
-// Toggle document favorite status
-function toggleFavorite(docId) {
-  const docs = getDocumentsList();
-  const docIndex = docs.findIndex((doc) => doc.id === docId);
-
-  if (docIndex >= 0) {
-    // Toggle favorite status
-    docs[docIndex].favorite = !docs[docIndex].favorite;
-    saveDocumentsList(docs);
-
-    // Show notification
-    const action = docs[docIndex].favorite ? "added to" : "removed from";
-    showNotification(`Document ${action} favorites`);
   }
 }
-
-// Set up filters and sorting for document manager
-function setupDocumentFiltersAndSorting() {
-  // Set up filter buttons
-  document.querySelectorAll(".doc-filter-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      // Remove active class from all buttons
-      document
-        .querySelectorAll(".doc-filter-btn")
-        .forEach((b) => b.classList.remove("active"));
-
-      // Add active class to clicked button
-      btn.classList.add("active");
-
-      // Refresh document list with new filter
-      showDocumentManager();
-    });
-  });
-
-  // Set up sort dropdown
-  const sortSelect = document.getElementById("docSortOrder");
-  if (sortSelect) {
-    sortSelect.addEventListener("change", () => {
-      showDocumentManager();
-    });
-  }
-}
-
-// Initialize document dropdown
-function initDocumentDropdown() {
-  const dropdown = document.getElementById("documentDropdown");
-  if (!dropdown) return;
-
-  dropdown.addEventListener("click", () => {
-    showDocumentManager();
-  });
-
-  // Quick action buttons
-  const newBtn = document.getElementById("quickNewDoc");
-  if (newBtn) {
-    newBtn.addEventListener("click", () => {
-      createNewDocument();
-    });
-  }
-
-  const saveBtn = document.getElementById("quickSave");
-  if (saveBtn) {
-    saveBtn.addEventListener("click", () => {
-      saveDocumentContent();
-      showNotification("Document saved");
-    });
-  }
-
-  // Update header with current document name
-  updateDocumentHeader();
-}
-
-// Modify your existing functions to update the document header

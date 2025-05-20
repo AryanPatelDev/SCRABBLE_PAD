@@ -7,9 +7,14 @@
     <link rel="stylesheet" href="style.css" />
     <link rel="manifest" href="manifest.json" />
     <meta name="theme-color" content="#181822" />
-    <link rel="apple-touch-icon" href="icon-192.png" />
-    <link rel="icon" href="favicon.ico" type="image/x-icon" />
-    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+
+    <!-- Fixed favicon references - remove leading slash -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png" />
+    <link rel="manifest" href="site.webmanifest" />
+
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
@@ -84,27 +89,6 @@
       role="menu"
     >
       <ul>
-        <!-- <li>
-          <button id="documentsBtn" class="block w-full text-left px-4 py-2">
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path
-                d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
-              ></path>
-              <polyline points="14 2 14 8 20 8"></polyline>
-              <line x1="16" y1="13" x2="8" y2="13"></line>
-              <line x1="16" y1="17" x2="8" y2="17"></line>
-              <polyline points="10 9 9 9 8 9"></polyline>
-            </svg>
-            Documents
-          </button>
-        </li> -->
         <li>
           <button id="import-btn" class="block w-full text-left px-4 py-2">
             <svg
@@ -140,6 +124,25 @@
           </button>
         </li>
         <li>
+          <button id="share-btn" class="block w-full text-left px-4 py-2">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="18" cy="5" r="3"></circle>
+              <circle cx="6" cy="12" r="3"></circle>
+              <circle cx="18" cy="19" r="3"></circle>
+              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+              <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+            </svg>
+            Generate Link
+          </button>
+        </li>
+        <li>
           <button id="darkModeToggle" class="block w-full text-left px-4 py-2">
             <svg
               width="16"
@@ -172,34 +175,126 @@
             Clear Text
           </button>
         </li>
+        <li>
+          <button id="showWelcomeBtn" class="block w-full text-left px-4 py-2">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            Welcome Guide
+          </button>
+        </li>
       </ul>
     </div>
 
-    <!-- Notification System -->
-    <div
-      id="notification"
-      class="hidden fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg transition-opacity duration-300"
-    >
-      Action completed successfully
-    </div>
-
-    <!-- Welcome Modal for First-time Users -->
-    <div
-      id="welcomeModal"
-      class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50"
-    >
-      <div
-        class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-lg"
-      >
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-lg font-bold">Welcome to Scrabble Pad!</h3>
-          <button id="closeWelcome" class="text-gray-500 hover:text-gray-700">
-            ✕
+    <!-- Share Link Dialog -->
+    <div id="shareLinkDialog" class="app-modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title">Share Your Note</h3>
+          <button id="closeShareDialog" class="modal-close" aria-label="Close">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
           </button>
         </div>
-        <div class="mb-4">
+        <div class="modal-body">
+          <p>Copy this link to share your note:</p>
+
+          <div class="input-container">
+            <input id="shareLink" type="text" readonly class="text-input" />
+            <button id="copyLink" class="button button-copy">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path
+                  d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"
+                ></path>
+              </svg>
+            </button>
+          </div>
+
+          <div class="share-section">
+            <p class="share-section-title">Or scan this QR code:</p>
+            <div class="qr-container mx-auto">
+              <canvas id="qrcode" width="200" height="200"></canvas>
+            </div>
+            <p class="qr-caption">Use your phone's camera to scan this code</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Shared Note View -->
+    <div
+      id="sharedNoteView"
+      class="hidden h-screen relative max-w-screen-lg mx-auto p-4"
+    >
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-bold">Shared Note</h3>
+          <button
+            id="editSharedNote"
+            class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+          >
+            Edit This Note
+          </button>
+        </div>
+        <pre
+          id="sharedNoteContent"
+          class="whitespace-pre-wrap p-4 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+        ></pre>
+      </div>
+    </div>
+
+    <!-- Notification System -->
+    <div id="notification" class="hidden">Action completed successfully</div>
+
+    <!-- Welcome Modal for First-time Users -->
+    <div id="welcomeModal" class="app-modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title">Welcome to Scrabble Pad</h3>
+          <button id="closeWelcome" class="modal-close" aria-label="Close">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
           <p>Scrabble Pad is a simple, distraction-free writing tool.</p>
-          <ul class="list-disc pl-5 my-3">
+
+          <ul class="welcome-list">
             <li>Click on "HEADING HERE..." to set your document title</li>
             <li>
               Use the settings menu (⚙️) to manage documents, import/export, and
@@ -207,37 +302,38 @@
             </li>
             <li>Your work is automatically saved as you type</li>
           </ul>
-          <p class="mt-3">Keyboard shortcuts:</p>
-          <div class="grid grid-cols-2 gap-2 mt-2 text-sm">
-            <div>Ctrl/Cmd + S</div>
+
+          <p>Keyboard shortcuts:</p>
+          <div class="shortcuts-grid">
+            <div>Ctrl + Shift + S | Ctrl + S</div>
             <div>Export File</div>
-            <div>Ctrl/Cmd + O</div>
+            <div>Ctrl + O</div>
             <div>Import File</div>
-            <div>Ctrl/Cmd + D</div>
+            <div>Ctrl + Shift + D | Ctrl+ D</div>
             <div>Toggle Dark Mode</div>
-            <div>Ctrl/Cmd + ,</div>
-            <div>Document Manager</div>
           </div>
+
+          <button id="startWriting" class="button w-full">Start Writing</button>
         </div>
-        <button
-          id="startWriting"
-          class="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
-        >
-          Start Writing
-        </button>
       </div>
     </div>
 
-    <!-- Footer with dynamic year
+    <!-- Footer with dynamic year -->
     <footer class="text-center text-xs text-gray-400 mt-8 pb-4">
-      Scrabble Pad v1.1 | &copy; <span id="currentYear"></span>
-    </footer> -->
+      Scrabble Pad v1.3
+    </footer>
 
     <!-- Update year script -->
     <script>
       document.getElementById("currentYear").textContent =
         new Date().getFullYear();
     </script>
+
+    <!-- LZString for compression -->
+    <script src="https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js"></script>
+
+    <!-- QR Code Generator -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
 
     <!-- Main script -->
     <script src="script.js"></script>
