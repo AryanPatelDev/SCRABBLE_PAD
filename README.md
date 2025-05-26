@@ -1,15 +1,15 @@
-# 🖊️ scrib.patelaryan.com — Minimal Scribble Pad
+# 🖊️ Minimal Scribble Pad
 
 A distraction-free writing pad built for quick notes, ideas, and thoughts. All data is stored locally by default — privacy-first by design.
 
 ## ✨ Features
 - 📝 Minimal writing interface with editable heading
-- 📤 Import/export text with heading via simple format
+- 📤 Import/export text with heading via simple .txt file format
 - 🌗 Dark mode toggle
 - 🔢 Live word and character count
 - 🔗 Share texts via unique URL
 - 📱 QR code generation for quick access on mobile
-- 🔒 100% local-first (no server needed for basic use)
+- 🔒 100% local
 
 ## 🚀 Live Demo
 [https://scrib.patelaryan.com](https://scrib.patelaryan.com)
@@ -27,4 +27,4 @@ Open to feature ideas and improvements. Feel free to start a discussion or issue
 
 ---
 
-> Built with ❤️ by [Aryan Patel](https://github.com/aryanpatel007)
+> Built with ❤️ by [Aryan Patel](https://github.com/aryanxpatel)
